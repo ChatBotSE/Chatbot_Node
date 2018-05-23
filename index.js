@@ -69,11 +69,13 @@ bot.dialog('CancelDialog',
     matches: 'Cancel'
 })
 
-bot.dialog('PaperNameDialog',
-    (session) => {
-        session.send('You reached the paper name intent. You said \'%s\'.', session.message.text);
+bot.dialog('PaperCodeDialog',
+    (session, args) => {
+		var intent = args.intent;
+		var myentities = builder.EntityRecognizer.findEntity(intent.entities, 'PaperName');
+        session.send('You reached the paper code intent. Entities are \'%s\'.', myentities.type);
         session.endDialog();
     }
 ).triggerAction({
-    matches: 'PaperName'
+    matches: 'Code'
 })
