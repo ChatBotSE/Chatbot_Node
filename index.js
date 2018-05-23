@@ -24,12 +24,14 @@ server.post('/api/messages', connector.listen());
 // Bots Dialogs 
 // =========================================================
 // This is called the root dialog. It is the first point of entry for any message the bot receives
-
+var bot = new builder.UniversalBot(connector, function (session, args) {
+    session.send('You reached the default message handler. You said \'%s\'.', session.message.text);
+});
 
 // Make sure you add code to validate these fields
-var luisAppId = process.env.LuisAppId;
-var luisAPIKey = process.env.LuisAPIKey;
-var luisAPIHostName = process.env.LuisAPIHostName || 'westus.api.cognitive.microsoft.com';
+var luisAppId = '3aa645c1-9347-4a5a-a25f-022baf694b6f';
+var luisAPIKey = '3470666eed1d471993bc88964aa0ea16';
+var luisAPIHostName = 'westus.api.cognitive.microsoft.com';
 
 const LuisModelUrl = 'https://' + luisAPIHostName + '/luis/v2.0/apps/' + luisAppId + '?subscription-key=' + luisAPIKey;
 
@@ -39,6 +41,7 @@ bot.recognizer(recognizer);
 
 // Add a dialog for each intent that the LUIS app recognizes.
 // See https://docs.microsoft.com/bot-framework/nodejs/bot-builder-nodejs-recognize-intent-luis 
+
 bot.dialog('GreetingDialog',
     (session) => {
         session.send('You reached the Greeting intent. You said \'%s\'.', session.message.text);
@@ -46,7 +49,7 @@ bot.dialog('GreetingDialog',
     }
 ).triggerAction({
     matches: 'Greeting'
-});
+})
 
 bot.dialog('HelpDialog',
     (session) => {
@@ -55,7 +58,7 @@ bot.dialog('HelpDialog',
     }
 ).triggerAction({
     matches: 'Help'
-});
+})
 
 bot.dialog('CancelDialog',
     (session) => {
@@ -64,13 +67,13 @@ bot.dialog('CancelDialog',
     }
 ).triggerAction({
     matches: 'Cancel'
-});
+})
 
-bot.dialog('/', function (session){
-
-	// Send 'hello world' to the user
-	session.send("You asked about a paper code");
-	}
+bot.dialog('PaperNameDialog',
+    (session) => {
+        session.send('You reached the paper name intent. You said \'%s\'.', session.message.text);
+        session.endDialog();
+    }
 ).triggerAction({
-    matches: 'paperCode'
-});
+    matches: 'PaperName'
+})
