@@ -24,9 +24,54 @@ server.post('/api/messages', connector.listen());
 // Bots Dialogs 
 // =========================================================
 // This is called the root dialog. It is the first point of entry for any message the bot receives
-bot.dialog('/', function (session) {
 
-// Send 'hello world' to the user
-session.send("Hello World");
 
-});
+// Make sure you add code to validate these fields
+var luisAppId = process.env.LuisAppId;
+var luisAPIKey = process.env.LuisAPIKey;
+var luisAPIHostName = process.env.LuisAPIHostName || 'westus.api.cognitive.microsoft.com';
+
+const LuisModelUrl = 'https://' + luisAPIHostName + '/luis/v2.0/apps/' + luisAppId + '?subscription-key=' + luisAPIKey;
+
+// Create a recognizer that gets intents from LUIS, and add it to the bot
+var recognizer = new builder.LuisRecognizer(LuisModelUrl);
+bot.recognizer(recognizer);
+
+// Add a dialog for each intent that the LUIS app recognizes.
+// See https://docs.microsoft.com/bot-framework/nodejs/bot-builder-nodejs-recognize-intent-luis 
+
+bot.dialog('GreetingDialog',
+    (session) => {
+        session.send('You reached the Greeting intent. You said \'%s\'.', session.message.text);
+        session.endDialog();
+    }
+).triggerAction({
+    matches: 'Greeting'
+})
+
+bot.dialog('PaperNameDialog',
+    (session) => {
+        session.send('Paper name asked for', session.message.text);
+        session.endDialog();
+    }
+).triggerAction({
+    matches: 'paperName'
+})
+
+bot.dialog('HelpDialog',
+    (session) => {
+        session.send('You reached the Help intent. You said \'%s\'.', session.message.text);
+        session.endDialog();
+    }
+).triggerAction({
+    matches: 'Help'
+})
+
+bot.dialog('CancelDialog',
+    (session) => {
+        session.send('You reached the Cancel intent. You said \'%s\'.', session.message.text);
+        session.endDialog();
+    }
+).triggerAction({
+    matches: 'Cancel'
+})
