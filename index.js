@@ -39,7 +39,6 @@ bot.recognizer(recognizer);
 
 // Add a dialog for each intent that the LUIS app recognizes.
 // See https://docs.microsoft.com/bot-framework/nodejs/bot-builder-nodejs-recognize-intent-luis 
-
 bot.dialog('GreetingDialog',
     (session) => {
         session.send('You reached the Greeting intent. You said \'%s\'.', session.message.text);
@@ -47,16 +46,7 @@ bot.dialog('GreetingDialog',
     }
 ).triggerAction({
     matches: 'Greeting'
-})
-
-bot.dialog('PaperNameDialog',
-    (session) => {
-        session.send('Paper name asked for', session.message.text);
-        session.endDialog();
-    }
-).triggerAction({
-    matches: 'paperName'
-})
+});
 
 bot.dialog('HelpDialog',
     (session) => {
@@ -65,7 +55,7 @@ bot.dialog('HelpDialog',
     }
 ).triggerAction({
     matches: 'Help'
-})
+});
 
 bot.dialog('CancelDialog',
     (session) => {
@@ -74,4 +64,13 @@ bot.dialog('CancelDialog',
     }
 ).triggerAction({
     matches: 'Cancel'
-})
+});
+
+bot.dialog('/', function (session){
+
+	// Send 'hello world' to the user
+	session.send("You asked about a paper code");
+	}
+).triggerAction({
+    matches: 'paperCode'
+});
