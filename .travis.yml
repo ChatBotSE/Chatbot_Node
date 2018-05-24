@@ -1,6 +1,7 @@
 language: node_js
 node_js:
   - "iojs"
-  - "node"
-  - "lts/*"
-  
+install:
+  - npm install
+script:
+  - npm test
