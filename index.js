@@ -72,10 +72,26 @@ bot.dialog('CancelDialog',
 bot.dialog('PaperCodeDialog',
     (session, args) => {
 		var intent = args.intent;
-		var myentities = builder.EntityRecognizer.findEntity(intent.entities, 'PaperName');
-        session.send('You reached the paper code intent. Entities are \'%s\'.', myentities.type);
+		var results = detectEntities(intent.entities);
+		
+		if(results[0] != ''){
+			session.send('Detected intent as Code, Detected Entity as Name. Name = \'%s\', Intent type = \'%s\'.', results[0].entity, intent.entity);
+		}
+		else{
+			session.send('You reached the paper code intent');
+		}
         session.endDialog();
     }
 ).triggerAction({
     matches: 'Code'
 })
+
+function detectEntities(entityArray){
+	var paperNameEntity = builder.EntityRecognizer.findEntity(entityArray, 'PaperName');
+	var paperCodeEntity = builder.EntityRecognizer.findEntity(entityArray, 'code');
+	var paperMajorEntity = builder.EntityRecognizer.findEntity(entityArray, 'major');
+	var paperCoreEntity = builder.EntityRecognizer.findEntity(entityArray, 'core');
+	
+	var locatedEntities = [paperNameEntity,paperCodeEntity,paperMajorEntity,paperCoreEntity];
+	return locatedEntities;
+}
