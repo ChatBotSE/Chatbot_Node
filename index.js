@@ -47,19 +47,55 @@ bot.dialog('PaperCodeDialog',
     (session, args) => {
 		var intent = args.intent;
 		var results = detectEntities(intent.entities);
+		var entityString = " WHERE ";
+		var foundResult = null;
 		
-		if(results[2] != ''){
-			session.send('Detected intent as Code, Detected Entity.  Name = \'%s\'', results[0].entity);
+		
+		//Take undercode and work into separate function to be called by all intents
+		if(results[0] != ""){
+			entityString = entityString+"papername LIKE '"+results[0]+"'";
+			if(results[1]!="" || results[2]!="" || results[3]!=""){
+				entityString = entityString+" AND ";
+			}
+		}
+		if(results[1] != ""){
+			entityString = entityString+"code LIKE '"+results[1]+"'";
+			if(results[2]!="" || results[3]!=""){
+				entityString = entityString+" AND ";
+			}
+		}
+		if(results[2] != ""){
+			entityString = entityString+"major LIKE '"+results[2]+"'";
+			if(results[3]!=""){
+				entityString = entityString+" AND ";
+			}
+		}
+		if(results[3] != ""){
+			entityString = entityString+"level LIKE '"+results[3]+"'";
+		}
+		//-------------------------------------------------------------------
+		
+		if(results[2] == ''){
+			var majors = ["analytics"];
+			for(i=0;i<majors.length;++i){
+				foundResult = database("SELECT * FROM "+majors[i]+entityString);
+				if(foundResult != null){
+					break;
+				}
+			}
 		}
 		else{
-			session.send('You reached the paper code intent with no major selected');
+			foundResult = database("SELECT code FROM"+results[2]+entityString);
 		}
+	
+		session.send('Heres the results: \'%s\'.', foundResult);
+		
         session.endDialog();
     }
 ).triggerAction({
     matches: 'Code'
 })
-
+/*
 //Paper Core
 bot.dialog('PaperCoreDialog',
     (session, args) => {
@@ -102,12 +138,8 @@ bot.dialog('PaperMajorDialog',
 		var intent = args.intent;
 		var results = detectEntities(intent.entities);
 		
-		if(results[2] != ''){
-			session.send('Detected intent as major, Detected Entity.  Name = \'%s\', Code = \'%s\', major = \'%s\',level = \'%s\'.', results[0], results[1], results[2], results[3]);
-		}
-		else{
-			session.send('You reached the paper major intent with no major selected');
-		}
+		session.send('Heres the results: \'%s\'.',results);
+		
         session.endDialog();
     }
 ).triggerAction({
@@ -137,6 +169,7 @@ bot.dialog('PaperPointsDialog',
     (session, args) => {
 		var intent = args.intent;
 		var results = detectEntities(intent.entities);
+		var printout = getResultsFromDB(results[0],results[1],results[2],results[3])
 		
 		if(results[2] != ''){
 			session.send('Detected intent as points, Detected Entity.  Name = \'%s\', Code = \'%s\', major = \'%s\',level = \'%s\'.', results[0], results[1], results[2], results[3]);
@@ -149,6 +182,8 @@ bot.dialog('PaperPointsDialog',
 ).triggerAction({
     matches: 'Points'
 })
+
+*/
 
 function detectEntities(entityArray){
 	var locatedEntities = ['','','','',''];
@@ -172,10 +207,66 @@ function detectEntities(entityArray){
 		}
 	}
 		
+	//For Testing
+	//End
+		
 	return resultArray;
 }
 
-//WIP
-function QueryBuilder(intent,paperNameEntity,paperCodeEntity,paperMajorEntity,paperLevelEntity){
-	return "SELECT "+intent+" FROM "+paperMajorEntity;
+//WIP---------------------OBSOLETE
+function getResultsFromDB(paperNameEntity,paperCodeEntity,paperMajorEntity,paperLevelEntity){
+	var majors = ["analytics"];
+	var foundResult = null;
+	
+	
+	if(paperMajorEntity == ""){
+		
+		for(i=0;i<majors.length;++i){
+			foundResult = database("SELECT * FROM "+majors[i]+" WHERE papername LIKE "+paperNameEntity+ " AND code LIKE "+paperCodeEntity+ " AND level LIKE "+paperNameEntity);
+			if(foundResult != null){
+				break;
+			}
+		}
+
+	}
+	else{
+		foundResult = database("SELECT * FROM "+paperMajorEntity+" WHERE papername LIKE "+paperNameEntity+ " AND code LIKE "+paperCodeEntity+ " AND level LIKE "+paperNameEntity);
+	}
+	
+	return foundResult;
 }
+
+//Query the database and return results plz fix 
+function database(query){
+	var result = "";
+	const { Client } = require('pg');
+
+	const client = new Client({
+	  connectionString: "postgres://xbmqawcfcgjhll:4296b0167991fbbcf2a98369e07b8f3db38bb0147ff6cf27143b39b2347a9c59@ec2-54-204-46-236.compute-1.amazonaws.com:5432/dd54f2u0f74q9c",
+	  ssl: true,
+	});
+
+	client.connect();
+	
+	console.log(query);
+	
+	client.query(query, (err, res) => {
+		if (err) throw err;
+
+		for (let row of res.rows) {
+		result = JSON.stringify(row);
+		console.log(JSON.stringify(row));
+		console.log('foo');
+	}
+	client.end();
+});
+
+return result;
+}
+
+
+
+
+
+
+
