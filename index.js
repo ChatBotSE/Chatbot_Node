@@ -42,43 +42,17 @@ bot.recognizer(recognizer);
 // Add a dialog for each intent that the LUIS app recognizes.
 // See https://docs.microsoft.com/bot-framework/nodejs/bot-builder-nodejs-recognize-intent-luis 
 
-bot.dialog('GreetingDialog',
-    (session) => {
-        session.send('You reached the Greeting intent. You said \'%s\'.', session.message.text);
-        session.endDialog();
-    }
-).triggerAction({
-    matches: 'Greeting'
-})
-
-bot.dialog('HelpDialog',
-    (session) => {
-        session.send('You reached the Help intent. You said \'%s\'.', session.message.text);
-        session.endDialog();
-    }
-).triggerAction({
-    matches: 'Help'
-})
-
-bot.dialog('CancelDialog',
-    (session) => {
-        session.send('You reached the Cancel intent. You said \'%s\'.', session.message.text);
-        session.endDialog();
-    }
-).triggerAction({
-    matches: 'Cancel'
-})
-
+//Paper Code
 bot.dialog('PaperCodeDialog',
     (session, args) => {
 		var intent = args.intent;
 		var results = detectEntities(intent.entities);
 		
-		if(results[0] != ''){
-			session.send('Detected intent as Code, Detected Entity as Name. Name = \'%s\', Intent type = \'%s\'.', results[0].entity, intent.entity);
+		if(results[2] != ''){
+			session.send('Detected intent as Code, Detected Entity.  Name = \'%s\'', results[0].entity);
 		}
 		else{
-			session.send('You reached the paper code intent');
+			session.send('You reached the paper code intent with no major selected');
 		}
         session.endDialog();
     }
@@ -86,12 +60,122 @@ bot.dialog('PaperCodeDialog',
     matches: 'Code'
 })
 
+//Paper Core
+bot.dialog('PaperCoreDialog',
+    (session, args) => {
+		var intent = args.intent;
+		var results = detectEntities(intent.entities);
+		
+		if(results[2] != ''){
+			session.send('Detected intent as Core, Detected Entity.  Name = \'%s\', Code = \'%s\', major = \'%s\',level = \'%s\'.', results[0], results[1], results[2], results[3]);
+		}
+		else{
+			session.send('You reached the paper core intent with no major selected');
+		}
+        session.endDialog();
+    }
+).triggerAction({
+    matches: 'Core'
+})
+
+//Paper Level
+bot.dialog('PaperLevelDialog',
+    (session, args) => {
+		var intent = args.intent;
+		var results = detectEntities(intent.entities);
+		
+		if(results[2] != ''){
+			session.send('Detected intent as Level, Detected Entity.  Name = \'%s\', Code = \'%s\', major = \'%s\',level = \'%s\'.', results[0], results[1], results[2], results[3]);
+		}
+		else{
+			session.send('You reached the paper level intent with no major selected');
+		}
+        session.endDialog();
+    }
+).triggerAction({
+    matches: 'PaperLevel'
+})
+
+//Paper Major
+bot.dialog('PaperMajorDialog',
+    (session, args) => {
+		var intent = args.intent;
+		var results = detectEntities(intent.entities);
+		
+		if(results[2] != ''){
+			session.send('Detected intent as major, Detected Entity.  Name = \'%s\', Code = \'%s\', major = \'%s\',level = \'%s\'.', results[0], results[1], results[2], results[3]);
+		}
+		else{
+			session.send('You reached the paper major intent with no major selected');
+		}
+        session.endDialog();
+    }
+).triggerAction({
+    matches: 'PaperMajor'
+})
+
+//Paper Name
+bot.dialog('PaperNameDialog',
+    (session, args) => {
+		var intent = args.intent;
+		var results = detectEntities(intent.entities);
+		
+		if(results[2] != ''){
+			session.send('Detected intent as name, Detected Entity.  Name = \'%s\', Code = \'%s\', major = \'%s\',level = \'%s\'.', results[0], results[1], results[2], results[3]);
+		}
+		else{
+			session.send('You reached the paper name intent with no major selected');
+		}
+        session.endDialog();
+    }
+).triggerAction({
+    matches: 'PaperName'
+})
+
+//Points
+bot.dialog('PaperPointsDialog',
+    (session, args) => {
+		var intent = args.intent;
+		var results = detectEntities(intent.entities);
+		
+		if(results[2] != ''){
+			session.send('Detected intent as points, Detected Entity.  Name = \'%s\', Code = \'%s\', major = \'%s\',level = \'%s\'.', results[0], results[1], results[2], results[3]);
+		}
+		else{
+			session.send('You reached the paper points intent with no major selected');
+		}
+        session.endDialog();
+    }
+).triggerAction({
+    matches: 'Points'
+})
+
 function detectEntities(entityArray){
-	var paperNameEntity = builder.EntityRecognizer.findEntity(entityArray, 'PaperName');
-	var paperCodeEntity = builder.EntityRecognizer.findEntity(entityArray, 'code');
-	var paperMajorEntity = builder.EntityRecognizer.findEntity(entityArray, 'major');
-	var paperCoreEntity = builder.EntityRecognizer.findEntity(entityArray, 'core');
+	var locatedEntities = ['','','','',''];
+	var resultArray = [];
 	
-	var locatedEntities = [paperNameEntity,paperCodeEntity,paperMajorEntity,paperCoreEntity];
-	return locatedEntities;
+	var paperNameEntity = builder.EntityRecognizer.findEntity(entityArray, 'PaperName');
+	var paperCodeEntity = builder.EntityRecognizer.findEntity(entityArray, 'PaperCode');
+	var paperMajorEntity = builder.EntityRecognizer.findEntity(entityArray, 'Major');
+	var paperLevelEntity = builder.EntityRecognizer.findEntity(entityArray, 'Level/Year');
+	
+	locatedEntities = [paperNameEntity,paperCodeEntity,paperMajorEntity,paperLevelEntity];
+	
+	console.log(locatedEntities);
+		
+	for(var i=0;i<locatedEntities.length;i++){
+		if(locatedEntities[i] != null){
+			resultArray[i] = locatedEntities[i].entity;
+		}
+		else{
+			resultArray[i] = '';
+		}
+	}
+		
+	return resultArray;
+}
+
+//WIP
+function QueryBuilder(intent,paperNameEntity,paperCodeEntity,paperMajorEntity,paperLevelEntity){
+	return "SELECT "+intent+" FROM "+paperMajorEntity;
 }
